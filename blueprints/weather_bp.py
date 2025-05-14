@@ -42,7 +42,7 @@ def _metar(airport):
 @weather_blueprint.route('/sigmets')
 def _get_sigmets():
     response = requests.get(
-        'https://aviationweather.gov/api/data/airsigmet?format=xml')
+        'https://aviationweather.gov/api/data/airsigmet?format=json')
     sigmet_list = []
     tree = etree.fromstring(response.content)
     for entry in tree.iter('AIRSIGMET'):
@@ -59,7 +59,27 @@ def _get_sigmets():
             pass
             # logging.Logger(str(e))
     return jsonify(sigmet_list)
-
+    
+@weather_blueprint.route('/cwa')
+def _get_cwa():
+    response = requests.get(
+        'https://aviationweather.gov/api/data/cwa?format=json')
+    cwa_list = []
+    tree = etree.fromstring(response.content)
+    for entry in tree.iter('CWA'):
+        try:
+            cwa_entry = {
+                'text': entry.find('raw_text').text,
+                'hazard': dict(entry.find('hazard').attrib),
+                'area': [[p.find('longitude').text, p.find('latitude').text] for p in entry.find('area').iter('point')],
+                'altitude': dict(entry.find('altitude').attrib),
+                'airsigmet_type': entry.find('airsigmet_type').text,
+            }
+            cwa_list.append(sigmet_entry)
+        except Exception as e:
+            pass
+            # logging.Logger(str(e))
+    return jsonify(cwa_list)
 
 @weather_blueprint.route('/datis/airport/<airport>')
 def _get_datis(airport):
