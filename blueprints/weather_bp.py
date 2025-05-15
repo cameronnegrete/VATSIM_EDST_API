@@ -42,8 +42,9 @@ def _metar(airport):
 @weather_blueprint.route('/sigmets')
 def _get_sigmets():
     response = requests.get(
-        'https://aviationweather.gov/api/data/airsigmet?format=xml')
-    sigmet_list = []
+        'https://aviationweather.gov/api/data/airsigmet?format=json')
+#Keeping this code incase needed, but suspect with the JSON instead of xml, we don't need this.
+'''    sigmet_list = []
     tree = etree.fromstring(response.content)
     for entry in tree.iter('AIRSIGMET'):
         try:
@@ -58,9 +59,19 @@ def _get_sigmets():
         except Exception as e:
             pass
             # logging.Logger(str(e))
-    return jsonify(sigmet_list)
+    return jsonify(sigmet_list)'''
+    return response
 
+@weather_blueprint.route('/cwa')
+def _get_cwa():
+    response=requests.get('https://aviationweather.gov/api/data/cwa?format=json')
+    return response
 
+@weather_blueprint.route('/mis')
+def _get_mis():
+    repsonse=requests.get('https://aviationweather.gov/api/data/mis?format=json')
+    return response
+    
 @weather_blueprint.route('/datis/airport/<airport>')
 def _get_datis(airport):
     return jsonify(get_datis(airport))
